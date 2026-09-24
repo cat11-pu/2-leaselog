@@ -1,0 +1,19 @@
+"""writer.py：写入门面（老接口 commit 不能改）。"""
+from __future__ import annotations
+
+from leaselog import LeaseLog
+
+
+class Writer:
+    def __init__(self, log: LeaseLog):
+        self.log = log
+        self.accepted = 0
+        self.data = {}
+
+    def commit(self, holder, value, now, token=None):
+        """老接口：不带 token 的写法必须继续可用。"""
+        if not self.log.check(holder, token, now):
+            return False
+        self.accepted += 1
+        self.data["v"] = value
+        return True

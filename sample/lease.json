@@ -1,0 +1,12 @@
+{
+  "ttl": 10,
+  "expect_min_epoch": 3,
+  "events": [
+    {"at": 0, "op": "grant", "holder": "c1"},
+    {"at": 5, "op": "commit", "holder": "c1", "value": "a", "token": 1},
+    {"at": 12, "op": "crash"},
+    {"at": 12, "op": "grant", "holder": "c2"},
+    {"at": 13, "op": "commit", "holder": "c1", "value": "stale", "token": 1},
+    {"at": 14, "op": "commit", "holder": "c2", "value": "b", "token": 3}
+  ]
+}
