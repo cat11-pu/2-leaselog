@@ -14,6 +14,7 @@ class Writer:
         """老接口：不带 token 的写法必须继续可用。"""
         if not self.log.check(holder, token, now):
             return False
+        self.log.log_write(holder, value, now)
         self.accepted += 1
         self.data["v"] = value
         return True
