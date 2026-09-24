@@ -11,9 +11,10 @@ class Writer:
         self.data = {}
 
     def commit(self, holder, value, now, token=None):
-        """老接口：不带 token 的写法必须继续可用。"""
+        """老接口：不带 token 的写法必须继续可用；带 token 走 fencing。"""
         if not self.log.check(holder, token, now):
             return False
+        self.log.record_write(holder, value, now)
         self.accepted += 1
         self.data["v"] = value
         return True

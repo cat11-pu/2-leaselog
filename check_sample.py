@@ -13,6 +13,9 @@ def main() -> int:
         spec = json.load(handle)
     log = LeaseLog()
     writer = Writer(log)
+    accepted = 0
+    replayed = 0
+    truncated = 0
     rows = []
     for event in spec["events"]:
         if event["op"] == "grant":
@@ -20,20 +23,23 @@ def main() -> int:
             rows.append((event["at"], "grant", epoch))
         elif event["op"] == "commit":
             ok = writer.commit(event["holder"], event["value"], event["at"], event.get("token"))
+            accepted += 1 if ok else 0
             rows.append((event["at"], "commit", ok))
         elif event["op"] == "crash":
-            blob = log.dump()
+            blob = log.dump() + b'{"op":"write","holder":"c1","value":"torn"'  # 模拟撕裂写
             log = LeaseLog()
             replayed = log.load(blob)
+            truncated += log.truncated
             writer = Writer(log)
             rows.append((event["at"], "crash-replay", replayed))
     print("事件结果 =", rows)
     print("最终 epoch =", log.epoch)
-    print("接受的写数 =", writer.accepted)
+    print("接受的写数 =", accepted)
     print("被拒的写数 =", log.rejected)
-    print("重放条数 =", rows[-1][2] if rows else 0)
-    print("残尾忽略 =", 1)
+    print("重放条数 =", replayed)
+    print("残尾忽略 =", truncated)
     print("重放后 epoch 不回退 =", log.epoch >= spec["expect_min_epoch"])
+    print("租期 =", spec["ttl"])
     return 0
 
 
